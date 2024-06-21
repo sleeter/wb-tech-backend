@@ -39,7 +39,7 @@ type Item struct {
 	Status      int    `json:"status"`
 }
 
-type Orders struct {
+type Order struct {
 	OrderId           string    `json:"order_uid"`
 	TrackNumber       string    `json:"track_number"`
 	Entry             string    `json:"entry"`
