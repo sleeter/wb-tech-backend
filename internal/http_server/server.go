@@ -2,11 +2,13 @@ package http_server
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
 	"wb-tech-backend/internal/http_server/handlers"
 	"wb-tech-backend/internal/pkg/web"
 	"wb-tech-backend/internal/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 type App struct {

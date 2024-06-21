@@ -1,10 +1,12 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
 	"log/slog"
 	"net/http"
+
 	"wb-tech-backend/internal/service"
+
+	"github.com/gin-gonic/gin"
 )
 
 func GetOrder(ctx *gin.Context, service *service.Service) error {

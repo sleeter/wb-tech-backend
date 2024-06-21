@@ -4,11 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v4/pgxpool"
+
 	"wb-tech-backend/internal/core"
 	"wb-tech-backend/internal/models"
 	"wb-tech-backend/internal/pkg/pgdb"
+
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v4/pgxpool"
 )
 
 type Deps struct {

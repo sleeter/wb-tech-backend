@@ -4,19 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"github.com/avast/retry-go/v4"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-	_ "github.com/jackc/pgx/v4/stdlib"
 	"log"
 	"time"
+
 	"wb-tech-backend/internal/core"
 	"wb-tech-backend/internal/http_server"
 	"wb-tech-backend/internal/nats"
 	"wb-tech-backend/internal/pkg/config"
 	"wb-tech-backend/internal/repository"
 	"wb-tech-backend/internal/service"
+
+	"github.com/avast/retry-go/v4"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/jackc/pgx/v4/stdlib"
 )
 
 func main() {

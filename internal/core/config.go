@@ -1,8 +1,9 @@
 package core
 
 import (
-	"github.com/spf13/viper"
 	"wb-tech-backend/internal/pkg/web"
+
+	"github.com/spf13/viper"
 )
 
 type StorageConfig struct {

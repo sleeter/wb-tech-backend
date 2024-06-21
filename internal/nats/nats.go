@@ -3,11 +3,13 @@ package nats
 import (
 	"context"
 	"encoding/json"
-	"github.com/go-playground/validator/v10"
-	"github.com/nats-io/nats.go"
 	"log"
+
 	"wb-tech-backend/internal/models"
 	"wb-tech-backend/internal/service"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/nats-io/nats.go"
 )
 
 type Deps struct {
