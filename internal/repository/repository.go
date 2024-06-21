@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -11,9 +12,9 @@ import (
 )
 
 type Deps struct {
-	Config             *core.Config
 	QueryManager       *pgdb.QueryManager
 	TransactionManager *pgdb.TransactionManager
+	Cash               map[string]models.Order
 }
 
 type Repository struct {
@@ -29,11 +30,25 @@ func NewRepository(ctx context.Context, cfg *core.Config) (*Repository, error) {
 	tm := pgdb.NewTransactionManager(pool)
 	r := &Repository{
 		Deps{
-			Config:             cfg,
 			QueryManager:       qm,
 			TransactionManager: tm,
+			Cash:               make(map[string]models.Order),
 		},
 	}
+	orders, err := r.GetOrders(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for _, order := range orders {
+		r.Cash[order.OrderId] = order
+	}
+	s := "{\n  \"order_uid\": \"b563feb7b2b84b6test\",\n  \"track_number\": \"WBILMTESTTRACK\",\n  \"entry\": \"WBIL\",\n  \"delivery\": {\n    \"name\": \"Test Testov\",\n    \"phone\": \"+9720000000\",\n    \"zip\": \"2639809\",\n    \"city\": \"Kiryat Mozkin\",\n    \"address\": \"Ploshad Mira 15\",\n    \"region\": \"Kraiot\",\n    \"email\": \"test@gmail.com\"\n  },\n  \"payment\": {\n    \"transaction\": \"b563feb7b2b84b6test\",\n    \"request_id\": \"\",\n    \"currency\": \"USD\",\n    \"provider\": \"wbpay\",\n    \"amount\": 1817,\n    \"payment_dt\": 1637907727,\n    \"bank\": \"alpha\",\n    \"delivery_cost\": 1500,\n    \"goods_total\": 317,\n    \"custom_fee\": 0\n  },\n  \"items\": [\n    {\n      \"chrt_id\": 9934930,\n      \"track_number\": \"WBILMTESTTRACK\",\n      \"price\": 453,\n      \"rid\": \"ab4219087a764ae0btest\",\n      \"name\": \"Mascaras\",\n      \"sale\": 30,\n      \"size\": \"0\",\n      \"total_price\": 317,\n      \"nm_id\": 2389212,\n      \"brand\": \"Vivienne Sabo\",\n      \"status\": 202\n    }\n  ],\n  \"locale\": \"en\",\n  \"internal_signature\": \"\",\n  \"customer_id\": \"test\",\n  \"delivery_service\": \"meest\",\n  \"shardkey\": \"9\",\n  \"sm_id\": 99,\n  \"date_created\": \"2021-11-26T06:22:19Z\",\n  \"oof_shard\": \"1\"\n}"
+	var ord models.Order
+	err = json.Unmarshal([]byte(s), &ord)
+	if err != nil {
+		return nil, err
+	}
+	r.Cash[ord.OrderId] = ord
 	return r, nil
 }
 
@@ -112,6 +127,7 @@ func (r *Repository) AddOrder(ctx context.Context, order models.Order) error {
 			return err
 		}
 		if orderId == order.OrderId {
+			r.Cash[order.OrderId] = order
 			return nil
 		}
 		return fmt.Errorf("something goes wrong with add order to database")
@@ -223,6 +239,99 @@ func (r *Repository) GetOrders(ctx context.Context) ([]models.Order, error) {
 			}
 			order.Items = append(order.Items, item)
 		}
+	}
+	return orders, nil
+}
+func (r *Repository) GetOrders2(ctx context.Context) ([]models.Order, error) {
+	query := sq.Select("*").From("orders").PlaceholderFormat(sq.Dollar)
+	rows, err := r.QueryManager.QuerySq(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	orders := make([]models.Order, 0)
+	var itemsIDs []int64
+	for rows.Next() {
+		var order Order
+		err = rows.Scan(
+			&order.OrderId, &order.TrackNumber, &order.Entry, &order.DeliveryId,
+			&order.PaymentId, &itemsIDs, &order.Locale, &order.InternalSignature,
+			&order.CustomerId, &order.DeliveryService, &order.Shardkey, &order.SmId,
+			&order.DateCreated, &order.OofShard,
+		)
+		if err != nil {
+			return nil, err
+		}
+		rows.Close()
+
+		query = sq.Select("*").From("delivery").Where(sq.Eq{"delivery_id": order.DeliveryId}).PlaceholderFormat(sq.Dollar)
+		rows, err = r.QueryManager.QuerySq(ctx, query)
+		if err != nil {
+			return nil, err
+		}
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+		var d models.Delivery
+		var id int64
+		err = rows.Scan(&id, &d.Name, &d.Phone, &d.Zip, &d.City, &d.Address, &d.Region, &d.Email)
+		if err != nil {
+			return nil, err
+		}
+		rows.Close()
+
+		query = sq.Select("*").From("payment").Where(sq.Eq{"payment_id": order.PaymentId}).PlaceholderFormat(sq.Dollar)
+		rows, err = r.QueryManager.QuerySq(ctx, query)
+		if err != nil {
+			return nil, err
+		}
+		if err = rows.Err(); err != nil {
+			return nil, err
+		}
+		var p models.Payment
+		err = rows.Scan(&id, &p.Transaction, &p.RequestId, &p.Currency, &p.Provider, &p.Amount, &p.PaymentDt, &p.Bank, &p.DeliveryCost, &p.GoodsTotal, &p.CustomFee)
+		if err != nil {
+			return nil, err
+		}
+		rows.Close()
+
+		items := make([]models.Item, 0)
+		for _, itemId := range itemsIDs {
+			query = sq.Select("*").From("items").Where(sq.Eq{"item_id": itemId}).PlaceholderFormat(sq.Dollar)
+			rows, err = r.QueryManager.QuerySq(ctx, query)
+			if err != nil {
+				return nil, err
+			}
+			if err = rows.Err(); err != nil {
+				return nil, err
+			}
+			var i models.Item
+			err = rows.Scan(&id, &i.ChrtId, &i.TrackNumber, &i.Price, &i.RId, &i.Name, &i.Sale, &i.Size, &i.TotalPrice, &i.NmId, &i.Brand, &i.Status)
+			if err != nil {
+				return nil, err
+			}
+			items = append(items, i)
+			rows.Close()
+		}
+		ord := models.Order{
+			OrderId:           order.OrderId,
+			TrackNumber:       order.TrackNumber,
+			Entry:             order.Entry,
+			Delivery:          d,
+			Payment:           p,
+			Items:             items,
+			Locale:            order.Locale,
+			InternalSignature: order.InternalSignature,
+			CustomerId:        order.CustomerId,
+			DeliveryService:   order.DeliveryService,
+			Shardkey:          order.Shardkey,
+			SmId:              order.SmId,
+			DateCreated:       order.DateCreated,
+			OofShard:          order.OofShard,
+		}
+		orders = append(orders, ord)
 	}
 	return orders, nil
 }
