@@ -33,7 +33,7 @@ func (app *App) Start(ctx context.Context) error {
 func (app *App) initRoutes() {
 	app.Router = gin.Default()
 
-	app.Router.GET("/order", app.mappedHandler(handlers.GetOrder))
+	app.Router.GET("/order", app.mappedHandler(handlers.GetOrder2))
 	app.Router.GET("/orders", app.mappedHandler(handlers.GetOrders))
 }
 

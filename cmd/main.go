@@ -5,8 +5,9 @@ import (
 	"database/sql"
 	"errors"
 	"log"
+	"log/slog"
+	"sync"
 	"time"
-
 	"wb-tech-backend/internal/core"
 	"wb-tech-backend/internal/http_server"
 	"wb-tech-backend/internal/nats"
@@ -23,7 +24,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	loader := config.PrepareLoader(config.WithConfigPath("./config.yaml"))
+	loader := config.PrepareLoader(config.WithConfigPath("./config.yml"))
 
 	cfg, err := core.ParseConfig(loader)
 	if err != nil {
@@ -36,23 +37,39 @@ func main() {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
+
 	repo, err := repository.NewRepository(ctx, cfg)
 	if err != nil {
 		log.Fatalf("Init repository: %s", err)
 	}
 
 	serv := service.NewService(repo, cfg)
-	n, err := nats.NewNats(serv)
+
+	n, err := nats.NewNats(serv, "test-cluster", cfg.Nats.Sub, cfg.Nats.SubUrl)
 	if err != nil {
 		log.Fatalf("Init nats: %s", err)
 	}
-	go n.SubscribeToUpdates(ctx)
+	defer func() {
+		err := n.NatsConnection.Close()
+		slog.Debug("Error with close nats: %s", err)
+		return
+	}()
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		err := n.SubscribeToUpdates(&wg, ctx, cfg.Nats.Subject)
+		if err != nil {
+			slog.Debug("Error with nats: %s", err)
+		}
+	}()
 
 	app := http_server.New(serv)
 
 	if err := app.Start(ctx); err != nil {
 		log.Fatalf(err.Error())
 	}
+	wg.Wait()
 }
 func UpMigrations(cfg *core.Config) error {
 	db, err := sql.Open("pgx", cfg.Storage.URL)

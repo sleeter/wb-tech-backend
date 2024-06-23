@@ -36,12 +36,17 @@ func (s Service) AddOrder(ctx context.Context, order models.Order) error {
 	return s.Repository.AddOrder(ctx, order)
 }
 func (s Service) ListOfOrders(ctx context.Context) ([]models.Order, error) {
-	return s.Repository.GetOrders(ctx)
+	m := s.Repository.Cash
+	orders := make([]models.Order, 0)
+	for _, ord := range m {
+		orders = append(orders, ord)
+	}
+	return orders, nil
 }
 func (s Service) GetOrder(ctx context.Context, orderId string) (models.Order, error) {
 	order, ok := s.Repository.Cash[orderId]
 	if !ok {
-		return models.Order{}, fmt.Errorf("order with id=%d not exsits", orderId)
+		return models.Order{}, fmt.Errorf("order with id=%s not exsits", orderId)
 	}
 	return order, nil
 }

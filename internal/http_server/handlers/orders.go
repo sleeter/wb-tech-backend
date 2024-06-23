@@ -10,15 +10,18 @@ import (
 )
 
 func GetOrder(ctx *gin.Context, service *service.Service) error {
-	var orderId string
-	if err := ctx.BindJSON(&orderId); err != nil {
+	var param struct {
+		OrderId string `json:"order_uid" binding:"required"`
+	}
+
+	if err := ctx.BindJSON(&param); err != nil {
 		slog.Debug("Error with getting order: %s", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return nil
 	}
-	order, err := service.GetOrder(ctx, orderId)
+	order, err := service.GetOrder(ctx, param.OrderId)
 	if err != nil {
 		slog.Debug("Error with getting order: %s", err)
 		return err
@@ -27,7 +30,7 @@ func GetOrder(ctx *gin.Context, service *service.Service) error {
 	return nil
 }
 func GetOrder2(ctx *gin.Context, service *service.Service) error {
-	orderId := ctx.Param("order_uid")
+	orderId := ctx.Query("order_uid")
 	if orderId == "" {
 		slog.Debug("Error with getting order: order id is empty")
 	}
