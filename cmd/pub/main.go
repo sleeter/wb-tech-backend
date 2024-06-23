@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/nats-io/stan.go"
 	"log"
 	"os"
+
 	"wb-tech-backend/internal/core"
 	"wb-tech-backend/internal/pkg/config"
+
+	"github.com/nats-io/stan.go"
 )
 
 func main() {

@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"sync"
 	"time"
+
 	"wb-tech-backend/internal/core"
 	"wb-tech-backend/internal/http_server"
 	"wb-tech-backend/internal/nats"
