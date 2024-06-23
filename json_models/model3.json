@@ -1,0 +1,62 @@
+{
+  "order_uid": "a1234567b8c9d0e1test",
+  "track_number": "TESTTRACK12345",
+  "entry": "",
+  "delivery": {
+    "name": "Jane Doe",
+    "phone": "+1234567890",
+    "zip": "12345",
+    "city": "Test City",
+    "address": "123 Test St",
+    "region": "Test Region",
+    "email": "jane.doe@test.com"
+  },
+  "payment": {
+    "transaction": "a1234567b8c9d0e1test",
+    "request_id": "req123",
+    "currency": "EUR",
+    "provider": "testpay",
+    "amount": 2200,
+    "payment_dt": 1638008727,
+    "bank": "beta",
+    "delivery_cost": 500,
+    "goods_total": 1700,
+    "custom_fee": 50
+  },
+  "items": [
+    {
+      "chrt_id": 11223344,
+      "track_number": "TESTTRACK12345",
+      "price": 850,
+      "rid": "cd4219087a764ae0btest",
+      "name": "Lipstick",
+      "sale": 10,
+      "size": "M",
+      "total_price": 765,
+      "nm_id": 3456789,
+      "brand": "Test Brand",
+      "status": 200
+    },
+    {
+      "chrt_id": 55667788,
+      "track_number": "TESTTRACK12345",
+      "price": 950,
+      "rid": "ef4219087a764ae0btest",
+      "name": "Foundation",
+      "sale": 20,
+      "size": "L",
+      "total_price": 760,
+      "nm_id": 9876543,
+      "brand": "Another Brand",
+      "status": 200
+    }
+  ],
+  "locale": "en",
+  "internal_signature": "",
+  "customer_id": "customer123",
+  "delivery_service": "dhl",
+  "shardkey": "5",
+  "sm_id": 42,
+  "date_created": "2021-11-27T08:30:00Z",
+  "oof_shard": "2"
+}
