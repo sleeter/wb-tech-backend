@@ -19,3 +19,10 @@
 Чтобы остановить сервис небходимо выполнить команду:
 
 ```docker-compose down```
+
+### Пример запроса
+```localhost:8080/order?order_uid=b563feb7b2b84b6test```
+![GET_order_example](https://github.com/sleeter/wb-tech-backend/pic/GET_order_example.png)
+
+```localhost:8080/orders```
+![GET_orders_example](https://github.com/sleeter/wb-tech-backend/pic/GET_orders_example.png)
