@@ -1,0 +1,11 @@
+server:
+  listen: ":8080"
+storage:
+  url: "postgres://postgres:password@db:5432/postgres?sslmode=disable"
+nats:
+  suburl: "nats://nats-streaming2:4222"
+  puburl: "nats://localhost:4222"
+  cluster: "test-cluster"
+  sub: "subscriber"
+  prod: "producer"
+  subject: "L0"

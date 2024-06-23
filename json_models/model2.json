@@ -1,0 +1,49 @@
+{
+  "order_uid": "c9876543b2a1d0f0test",
+  "track_number": "TRACKTEST67890",
+  "entry": "ENTER",
+  "delivery": {
+    "name": "John Smith",
+    "phone": "+0987654321",
+    "zip": "98765",
+    "city": "Another City",
+    "address": "456 Another St",
+    "region": "Another Region",
+    "email": "john.smith@test.com"
+  },
+  "payment": {
+    "transaction": "c9876543b2a1d0f0test",
+    "request_id": "req456",
+    "currency": "GBP",
+    "provider": "paytest",
+    "amount": 3050,
+    "payment_dt": 1638109727,
+    "bank": "gamma",
+    "delivery_cost": 700,
+    "goods_total": 2350,
+    "custom_fee": 50
+  },
+  "items": [
+    {
+      "chrt_id": 22334455,
+      "track_number": "TRACKTEST67890",
+      "price": 1200,
+      "rid": "gh4219087a764ae0btest",
+      "name": "Perfume",
+      "sale": 15,
+      "size": "S",
+      "total_price": 1020,
+      "nm_id": 6543210,
+      "brand": "Fancy Brand",
+      "status": 200
+    }
+  ],
+  "locale": "fr",
+  "internal_signature": "",
+  "customer_id": "cust456",
+  "delivery_service": "fedex",
+  "shardkey": "3",
+  "sm_id": 24,
+  "date_created": "2021-11-28T10:40:00Z",
+  "oof_shard": "3"
+}
