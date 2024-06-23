@@ -39,7 +39,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error with publish to nats: %s", err)
 	}
-	log.Printf("second message uccessfuly publish to nats")
+	log.Printf("second message successfuly publish to nats")
 
 	bytes, err = os.ReadFile("json_models/model3.json")
 
