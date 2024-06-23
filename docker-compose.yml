@@ -5,16 +5,17 @@ services:
     container_name: app
     build:
       context: .
-      args:
-        LOCAL: "true"
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     depends_on:
-      - db
-      - nats-streaming
+      nats-streaming2:
+        condition: service_started
+      db:
+        condition: service_healthy
     links:
       - db
-      - nats-streaming
+      - nats-streaming2
     networks:
       - enrollment
 
@@ -27,22 +28,45 @@ services:
       - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - enrollment
 
-  nats-streaming:
-    image: nats-streaming:latest
-    container_name: nats-streaming
-    environment:
-      - CLUSTER_ID=test-cluster
-      - STORE=nats
-      - NATS_SERVER_URL=nats://localhost:4222
+  nats-streaming2:
+    command:
+      - "--cluster_id"
+      - "test-cluster"
+    image: library/nats-streaming:latest
+    restart: always
+    container_name: nats-streaming2
     ports:
       - "4222:4222"
       - "8222:8222"
+    volumes:
+      - ./volumes/nats_data_store:/repository:Z
+    networks:
+      - enrollment
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4:7.6
+    restart: always
+    env_file:
+      - config.env
+    ports:
+      - "8081:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgAdmin
     networks:
       - enrollment
 
 networks:
   enrollment:
     driver: bridge
+
+volumes:
+  pgadmin-data:
